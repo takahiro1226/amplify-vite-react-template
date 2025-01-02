@@ -1,0 +1,49 @@
+import { useEffect, useState } from "react";
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import { Amplify } from 'aws-amplify';
+import outputs from '../amplify_outputs.json';
+import '@aws-amplify/ui-react/styles.css';
+import { ThemeProvider } from '@aws-amplify/ui-react';
+import { TodoCreateForm, TodoUpdateForm } from '../ui-components';
+
+Amplify.configure(outputs);
+
+function App() {
+  const [todos, setTodos] = useState([]);
+  const { user, signOut } = useAuthenticator();
+
+  useEffect(() => {
+    client.models.Todo.observeQuery().subscribe({
+      next: (data) => setTodos([...data.items]),
+    });
+  }, []);
+
+  function createTodo() {
+    client.models.Todo.create({ content: window.prompt("Todo content") });
+  }
+
+  function deleteTodo(id) {
+    client.models.Todo.delete({ id });
+  }
+
+  return (
+    <main>
+      <h1>{user?.username}'s todos</h1>
+      <TodoCreateForm
+        onSuccess={(newTodo) => setTodos([...todos, newTodo])}
+        onError={(error) => console.error('Error creating todo:', error)}
+      />
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.content}
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+      <button onClick={signOut}>Sign out</button>
+    </main>
+  );
+}
+
+export default App;
