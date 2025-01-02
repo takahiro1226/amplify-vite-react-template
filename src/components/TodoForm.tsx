@@ -15,7 +15,7 @@ export function TodoForm({ editTodo, onCancel }: TodoFormProps) {
 
   useEffect(() => {
     if (editTodo) {
-      setContent(editTodo.content);
+      setContent(editTodo.content ?? '');
     } else {
       setContent('');
     }
